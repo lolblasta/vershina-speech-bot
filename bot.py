@@ -14,6 +14,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
 from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -50,7 +51,7 @@ TEST_MODE        = not YOOKASSA_SHOP_ID or YOOKASSA_SHOP_ID == "test"
 Configuration.account_id  = YOOKASSA_SHOP_ID
 Configuration.secret_key  = YOOKASSA_KEY
 
-bot       = Bot(token=BOT_TOKEN, parse_mode="Markdown")
+bot       = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="Markdown"))
 dp        = Dispatcher(storage=MemoryStorage())
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
@@ -441,7 +442,7 @@ async def cmd_free(msg: types.Message, state: FSMContext):
     await msg.answer("✅ *Тестовая активация!*\n\nКурс активирован. Вот первое задание:")
     await send_day(msg.from_user.id, 1)
 
-async def daily_job():
+async def daily_job():h
     """Запускается каждый час — рассылает задания нужным пользователям."""
     now_hour = datetime.now().hour
     users = await get_all_active()
