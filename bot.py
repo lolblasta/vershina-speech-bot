@@ -1,6 +1,6 @@
 """
-30 Ð´Ð½ÐµÐ¹ Ðº ÑÐ¸ÑÑÐ¾Ð¹ ÑÐµÑÐ¸ â Telegram-Ð±Ð¾Ñ
-ÐÐµÑÑÐºÐ¸Ð¹ Ð»Ð¾Ð³Ð¾Ð¿ÐµÐ´Ð¸ÑÐµÑÐºÐ¸Ð¹ ÑÐµÐ½ÑÑ Â«ÐÐµÑÑÐ¸Ð½Ð°Â»
+30 дней к чистой речи — Telegram-бот
+Детский логопедический центр «Вершина»
 """
 import asyncio
 import logging
@@ -36,7 +36,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-# âââ ÐÐ¾Ð½ÑÐ¸Ð³ ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── Конфиг ──────────────────────────────────────────────────────────────────
 BOT_TOKEN        = os.getenv("BOT_TOKEN", "")
 YOOKASSA_SHOP_ID = os.getenv("YOOKASSA_SHOP_ID", "")
 YOOKASSA_KEY     = os.getenv("YOOKASSA_SECRET_KEY", "")
@@ -54,14 +54,14 @@ bot       = Bot(token=BOT_TOKEN, parse_mode="Markdown")
 dp        = Dispatcher(storage=MemoryStorage())
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
-# âââ FSM âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── FSM ─────────────────────────────────────────────────────────────────────
 class Reg(StatesGroup):
     age     = State()
     problem = State()
     time    = State()
     pay     = State()
 
-# âââ ÐÐ ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── БД ──────────────────────────────────────────────────────────────────────
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("""
@@ -120,52 +120,52 @@ async def count_all() -> tuple[int, int]:
             paid = (await c.fetchone())[0]
     return total, paid
 
-# âââ ÐÐ»Ð°Ð²Ð¸Ð°ÑÑÑÑ ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── Клавиатуры ──────────────────────────────────────────────────────────────
 def kb_age() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="ð¶ 1.5â3 Ð³Ð¾Ð´Ð°",  callback_data="age_young")],
-        [InlineKeyboardButton(text="ð§ 3â5 Ð»ÐµÑ",     callback_data="age_middle")],
-        [InlineKeyboardButton(text="ð§ 5â7 Ð»ÐµÑ",     callback_data="age_older")],
+        [InlineKeyboardButton(text="👶 1.5–3 года",  callback_data="age_young")],
+        [InlineKeyboardButton(text="🧒 3–5 лет",     callback_data="age_middle")],
+        [InlineKeyboardButton(text="🧒 5–7 лет",     callback_data="age_older")],
     ])
 
 def kb_problem() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="ð¬ ÐÐ°Ð»Ð¾ Ð³Ð¾Ð²Ð¾ÑÐ¸Ñ / Ð½Ðµ Ð³Ð¾Ð²Ð¾ÑÐ¸Ñ",     callback_data="prob_launch")],
-        [InlineKeyboardButton(text="ð¤ ÐÐµ Ð¿ÑÐ¾Ð¸Ð·Ð½Ð¾ÑÐ¸Ñ Ð·Ð²ÑÐº Ð ",           callback_data="prob_sound_r")],
-        [InlineKeyboardButton(text="ð Ð¥Ð¾ÑÑ ÑÐ°Ð·Ð²Ð¸ÑÑ ÑÐµÑÑ Ð² ÑÐµÐ»Ð¾Ð¼",      callback_data="prob_general")],
+        [InlineKeyboardButton(text="💬 Мало говорит / не говорит",     callback_data="prob_launch")],
+        [InlineKeyboardButton(text="🔤 Не произносит звук Р",           callback_data="prob_sound_r")],
+        [InlineKeyboardButton(text="📚 Хочу развить речь в целом",      callback_data="prob_general")],
     ])
 
 def kb_time() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="âï¸ 8:00",   callback_data="time_8"),
-         InlineKeyboardButton(text="ð¤ 9:00",   callback_data="time_9")],
-        [InlineKeyboardButton(text="ð 10:00",  callback_data="time_10"),
-         InlineKeyboardButton(text="ð 12:00",  callback_data="time_12")],
-        [InlineKeyboardButton(text="ð 18:00",  callback_data="time_18"),
-         InlineKeyboardButton(text="ð 20:00",  callback_data="time_20")],
+        [InlineKeyboardButton(text="☀️ 8:00",   callback_data="time_8"),
+         InlineKeyboardButton(text="🌤 9:00",   callback_data="time_9")],
+        [InlineKeyboardButton(text="🌅 10:00",  callback_data="time_10"),
+         InlineKeyboardButton(text="🕛 12:00",  callback_data="time_12")],
+        [InlineKeyboardButton(text="🌆 18:00",  callback_data="time_18"),
+         InlineKeyboardButton(text="🌙 20:00",  callback_data="time_20")],
     ])
 
 def kb_pay(url: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"ð³ ÐÐ¿Ð»Ð°ÑÐ¸ÑÑ {PRICE_RUB} â½", url=url)],
-        [InlineKeyboardButton(text="â Ð¯ Ð¾Ð¿Ð»Ð°ÑÐ¸Ð» â Ð¿ÑÐ¾Ð²ÐµÑÐ¸ÑÑ", callback_data="check_pay")],
-        [InlineKeyboardButton(text="â ÐÐ¾Ð¿ÑÐ¾Ñ / Ð¿Ð¾Ð¼Ð¾ÑÑ", url=SUPPORT_URL)],
+        [InlineKeyboardButton(text=f"💳 Оплатить {PRICE_RUB} ₽", url=url)],
+        [InlineKeyboardButton(text="✅ Я оплатил — проверить", callback_data="check_pay")],
+        [InlineKeyboardButton(text="❓ Вопрос / помощь", url=SUPPORT_URL)],
     ])
 
 def kb_support() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="ð¬ ÐÐ°Ð¿Ð¸ÑÐ°ÑÑ Ð»Ð¾Ð³Ð¾Ð¿ÐµÐ´Ñ", url=SUPPORT_URL)],
-        [InlineKeyboardButton(text="ð¢ ÐÐ°Ñ Telegram-ÐºÐ°Ð½Ð°Ð»", url=CHANNEL_URL)],
+        [InlineKeyboardButton(text="💬 Написать логопеду", url=SUPPORT_URL)],
+        [InlineKeyboardButton(text="📢 Наш Telegram-канал", url=CHANNEL_URL)],
     ])
 
 def kb_next_day(day: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="â Ð¡Ð´ÐµÐ»Ð°Ð»Ð¸! ÐÐ°Ð²ÑÑÐ° Ð¶Ð´Ñ ÑÐ»ÐµÐ´ÑÑÑÐµÐµ",
+        [InlineKeyboardButton(text="✅ Сделали! Завтра жду следующее",
                               callback_data=f"done_{day}")],
-        [InlineKeyboardButton(text="â ÐÐ¾Ð¿ÑÐ¾Ñ Ð»Ð¾Ð³Ð¾Ð¿ÐµÐ´Ñ", url=SUPPORT_URL)],
+        [InlineKeyboardButton(text="❓ Вопрос логопеду", url=SUPPORT_URL)],
     ])
 
-# âââ Ð¥ÐµÐ½Ð´Ð»ÐµÑÑ ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── Хендлеры ────────────────────────────────────────────────────────────────
 @dp.message(CommandStart())
 async def cmd_start(msg: types.Message, state: FSMContext):
     await upsert_user(msg.from_user.id, msg.from_user.username or "")
@@ -173,19 +173,19 @@ async def cmd_start(msg: types.Message, state: FSMContext):
 
     if user and user["paid"] and user["day_num"] > 0:
         await msg.answer(
-            f"Ð¡ Ð²Ð¾Ð·Ð²ÑÐ°ÑÐµÐ½Ð¸ÐµÐ¼! ð\n\n"
-            f"Ð¢Ñ Ð½Ð° *Ð´Ð½Ðµ {user['day_num']} Ð¸Ð· 30*. "
-            f"Ð¡Ð»ÐµÐ´ÑÑÑÐµÐµ Ð·Ð°Ð´Ð°Ð½Ð¸Ðµ Ð¿ÑÐ¸Ð´ÑÑ Ð² {user['send_hour']}:00.\n\n"
-            f"Ð¥Ð¾ÑÐµÑÑ Ð¿Ð¾Ð»ÑÑÐ¸ÑÑ Ð·Ð°Ð´Ð°Ð½Ð¸Ðµ Ð¿ÑÑÐ¼Ð¾ ÑÐµÐ¹ÑÐ°Ñ? ÐÐ°Ð¿Ð¸ÑÐ¸ /today",
+            f"С возвращением! 👋\n\n"
+            f"Ты на *дне {user['day_num']} из 30*. "
+            f"Следующее задание придёт в {user['send_hour']}:00.\n\n"
+            f"Хочешь получить задание прямо сейчас? Напиши /today",
         )
         return
 
     await state.clear()
     await msg.answer(
-        "ð ÐÑÐ¸Ð²ÐµÑ! Ð­ÑÐ¾ Ð±Ð¾Ñ Ð»Ð¾Ð³Ð¾Ð¿ÐµÐ´Ð¸ÑÐµÑÐºÐ¾Ð³Ð¾ ÑÐµÐ½ÑÑÐ° *Â«ÐÐµÑÑÐ¸Ð½Ð°Â»*.\n\n"
-        "ÐÐ´ÐµÑÑ Ð²Ñ Ð¿Ð¾Ð»ÑÑÐ¸ÑÐµ *30 ÐµÐ¶ÐµÐ´Ð½ÐµÐ²Ð½ÑÑ Ð·Ð°Ð´Ð°Ð½Ð¸Ð¹* Ð´Ð»Ñ ÑÐ°Ð·Ð²Ð¸ÑÐ¸Ñ ÑÐµÑÐ¸ ÑÐµÐ±ÑÐ½ÐºÐ° â "
-        "ÐºÐ¾ÑÐ¾ÑÐºÐ¸Ñ, Ð¿ÑÐ°ÐºÑÐ¸ÑÐ½ÑÑ Ð¸ Ð¿ÑÐ¾Ð²ÐµÑÐµÐ½Ð½ÑÑ Ð»Ð¾Ð³Ð¾Ð¿ÐµÐ´Ð¾Ð¼.\n\n"
-        "ÐÐ»Ñ Ð½Ð°ÑÐ°Ð»Ð° ÑÐºÐ°Ð¶Ð¸ÑÐµ: ÑÐºÐ¾Ð»ÑÐºÐ¾ Ð»ÐµÑ Ð²Ð°ÑÐµÐ¼Ñ ÑÐµÐ±ÑÐ½ÐºÑ?",
+        "👋 Привет! Это бот логопедического центра *«Вершина»*.\n\n"
+        "Здесь вы получите *30 ежедневных заданий* для развития речи ребёнка — "
+        "коротких, практичных и проверенных логопедом.\n\n"
+        "Для начала скажите: сколько лет вашему ребёнку?",
         reply_markup=kb_age(),
     )
     await state.set_state(Reg.age)
@@ -195,8 +195,8 @@ async def cb_age(call: types.CallbackQuery, state: FSMContext):
     age = call.data.replace("age_", "")
     await state.update_data(age=age)
     await call.message.edit_text(
-        f"ÐÑÐ»Ð¸ÑÐ½Ð¾! ÐÐ¾Ð·ÑÐ°ÑÑ: *{AGE_GROUPS[age]}*\n\n"
-        "Ð§ÑÐ¾ Ð²Ð°Ñ Ð±ÐµÑÐ¿Ð¾ÐºÐ¾Ð¸Ñ Ð±Ð¾Ð»ÑÑÐµ Ð²ÑÐµÐ³Ð¾?",
+        f"Отлично! Возраст: *{AGE_GROUPS[age]}*\n\n"
+        "Что вас беспокоит больше всего?",
         reply_markup=kb_problem(),
     )
     await state.set_state(Reg.problem)
@@ -209,18 +209,18 @@ async def cb_problem(call: types.CallbackQuery, state: FSMContext):
     age = data["age"]
     track = get_track(age, problem)
 
-    # ÐÑÐ»Ð¸ Ð²ÑÐ±ÑÐ°Ð» Ð , Ð½Ð¾ ÑÐµÐ±ÑÐ½ÐºÑ < 3 Ð»ÐµÑ â Ð¼ÑÐ³ÐºÐ¾ Ð¿ÐµÑÐµÐºÐ»ÑÑÐ°ÐµÐ¼
+    # Если выбрал Р, но ребёнку < 3 лет — мягко переключаем
     note = ""
     if problem == "sound_r" and age == "young":
         note = (
-            "\n\n_ÐÐ²ÑÐº Ð  Ð¾Ð±ÑÑÐ½Ð¾ ÑÐ¾ÑÐ¼Ð¸ÑÑÐµÑÑÑ Ð¿Ð¾ÑÐ»Ðµ 5 Ð»ÐµÑ. "
-            "ÐÐ»Ñ Ð²Ð°ÑÐµÐ³Ð¾ Ð²Ð¾Ð·ÑÐ°ÑÑÐ° Ð¿Ð¾Ð´Ð±ÐµÑÑÐ¼ ÑÑÐµÐº Ð½Ð° Ð·Ð°Ð¿ÑÑÐº Ð¸ ÑÐ°Ð·Ð²Ð¸ÑÐ¸Ðµ ÑÐµÑÐ¸ Ð² ÑÐµÐ»Ð¾Ð¼._"
+            "\n\n_Звук Р обычно формируется после 5 лет. "
+            "Для вашего возраста подберём трек на запуск и развитие речи в целом._"
         )
 
     await state.update_data(problem=problem, track=track)
     await call.message.edit_text(
-        f"ÐÐ¾Ð½ÑÐ»! Ð¢ÐµÐ¼Ð°: *{PROBLEMS[problem]}*{note}\n\n"
-        "Ð ÐºÐ°ÐºÐ¾Ðµ Ð²ÑÐµÐ¼Ñ Ð²Ð°Ð¼ ÑÐ´Ð¾Ð±Ð½Ð¾ Ð¿Ð¾Ð»ÑÑÐ°ÑÑ ÐµÐ¶ÐµÐ´Ð½ÐµÐ²Ð½Ð¾Ðµ Ð·Ð°Ð´Ð°Ð½Ð¸Ðµ?",
+        f"Понял! Тема: *{PROBLEMS[problem]}*{note}\n\n"
+        "В какое время вам удобно получать ежедневное задание?",
         reply_markup=kb_time(),
     )
     await state.set_state(Reg.time)
@@ -240,18 +240,29 @@ async def cb_time(call: types.CallbackQuery, state: FSMContext):
     )
     await state.update_data(hour=hour)
 
-    # Ð¡Ð¾Ð·Ð´Ð°ÑÐ¼ Ð¿Ð»Ð°ÑÑÐ¶ Ð² Ð®Kassa
+    # Тестовый режим — пропустить оплату
+    if TEST_MODE:
+        await activate_user(call.from_user.id)
+        await state.clear()
+        await call.message.edit_text(
+            "🧪 *Тестовый режим*\n\n"
+            "ЮKassa не настроена — курс активирован бесплатно. Вот первое задание:"
+        )
+        await send_day(call.from_user.id, 1)
+        return
+
+    # Создаём платёж в ЮKassa
     payment_url, payment_id = await create_payment(call.from_user.id)
     await set_field(call.from_user.id, payment_id=payment_id)
 
     await call.message.edit_text(
-        f"â¨ *ÐÑÑ Ð³Ð¾ÑÐ¾Ð²Ð¾!*\n\n"
-        f"ÐÐ°Ñ Ð¿ÐµÑÑÐ¾Ð½Ð°Ð»ÑÐ½ÑÐ¹ ÐºÑÑÑ ÑÑÐ¾ÑÐ¼Ð¸ÑÐ¾Ð²Ð°Ð½:\n"
-        f"â¢ ÐÐ¾Ð·ÑÐ°ÑÑ: *{AGE_GROUPS[data['age']]}*\n"
-        f"â¢ Ð¢ÐµÐ¼Ð°: *{PROBLEMS[data['problem']]}*\n"
-        f"â¢ ÐÐ°Ð´Ð°Ð½Ð¸Ðµ ÐºÐ°Ð¶Ð´ÑÐ¹ Ð´ÐµÐ½Ñ Ð² *{hour}:00*\n\n"
-        f"Ð¡ÑÐ¾Ð¸Ð¼Ð¾ÑÑÑ Ð¿Ð¾Ð»Ð½Ð¾Ð³Ð¾ ÐºÑÑÑÐ° (30 Ð´Ð½ÐµÐ¹) â *{PRICE_RUB} â½*\n\n"
-        f"ÐÐ¾ÑÐ»Ðµ Ð¾Ð¿Ð»Ð°ÑÑ Ð²Ñ ÑÑÐ°Ð·Ñ Ð¿Ð¾Ð»ÑÑÐ¸ÑÐµ Ð¿ÐµÑÐ²Ð¾Ðµ Ð·Ð°Ð´Ð°Ð½Ð¸Ðµ ð",
+        f"✨ *Всё готово!*\n\n"
+        f"Ваш персональный курс сформирован:\n"
+        f"• Возраст: *{AGE_GROUPS[data['age']]}*\n"
+        f"• Тема: *{PROBLEMS[data['problem']]}*\n"
+        f"• Задание каждый день в *{hour}:00*\n\n"
+        f"Стоимость полного курса (30 дней) — *{PRICE_RUB} ₽*\n\n"
+        f"После оплаты вы сразу получите первое задание 🎉",
         reply_markup=kb_pay(payment_url),
     )
     await state.set_state(Reg.pay)
@@ -261,7 +272,7 @@ async def cb_time(call: types.CallbackQuery, state: FSMContext):
 async def cb_check_pay(call: types.CallbackQuery, state: FSMContext):
     user = await get_user(call.from_user.id)
     if not user or not user["payment_id"]:
-        await call.answer("ÐÐ»Ð°ÑÑÐ¶ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½. ÐÐ¾Ð¿ÑÐ¾Ð±ÑÐ¹ÑÐµ /start", show_alert=True)
+        await call.answer("Платёж не найден. Попробуйте /start", show_alert=True)
         return
 
     paid = await check_payment(user["payment_id"])
@@ -269,23 +280,23 @@ async def cb_check_pay(call: types.CallbackQuery, state: FSMContext):
         await activate_user(call.from_user.id)
         await state.clear()
         await call.message.edit_text(
-            "â *ÐÐ¿Ð»Ð°ÑÐ° Ð¿Ð¾Ð´ÑÐ²ÐµÑÐ¶Ð´ÐµÐ½Ð°!*\n\n"
-            "ÐÐ¾Ð±ÑÐ¾ Ð¿Ð¾Ð¶Ð°Ð»Ð¾Ð²Ð°ÑÑ Ð² ÐºÑÑÑ Â«30 Ð´Ð½ÐµÐ¹ Ðº ÑÐ¸ÑÑÐ¾Ð¹ ÑÐµÑÐ¸Â»!\n"
-            "ÐÐ¾Ñ Ð²Ð°ÑÐµ Ð¿ÐµÑÐ²Ð¾Ðµ Ð·Ð°Ð´Ð°Ð½Ð¸Ðµ ð"
+            "✅ *Оплата подтверждена!*\n\n"
+            "Добро пожаловать в курс «30 дней к чистой речи»!\n"
+            "Вот ваше первое задание 👇"
         )
         await send_day(call.from_user.id, 1)
     else:
         await call.answer(
-            "ÐÐ»Ð°ÑÑÐ¶ ÐµÑÑ Ð½Ðµ Ð¿ÑÐ¾ÑÑÐ». ÐÐ¾Ð¿ÑÐ¾Ð±ÑÐ¹ÑÐµ ÑÐµÑÐµÐ· Ð¼Ð¸Ð½ÑÑÑ Ð¸Ð»Ð¸ Ð½Ð°Ð¿Ð¸ÑÐ¸ÑÐµ Ð½Ð°Ð¼.",
+            "Платёж ещё не прошёл. Попробуйте через минуту или напишите нам.",
             show_alert=True,
         )
 
-# âââ ÐÐ¾Ð¼Ð°Ð½Ð´Ñ Ð´Ð»Ñ Ð°ÐºÑÐ¸Ð²Ð½ÑÑ Ð¿Ð¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÐµÐ»ÐµÐ¹ ââââââââââââââââââââââââââââââââââââââ
+# ─── Команды для активных пользователей ──────────────────────────────────────
 @dp.message(Command("today"))
 async def cmd_today(msg: types.Message):
     user = await get_user(msg.from_user.id)
     if not user or not user["paid"]:
-        await msg.answer("Ð¡Ð½Ð°ÑÐ°Ð»Ð° Ð½ÑÐ¶Ð½Ð¾ Ð¿ÑÐ¾Ð¹ÑÐ¸ ÑÐµÐ³Ð¸ÑÑÑÐ°ÑÐ¸Ñ Ð¸ Ð¾Ð¿Ð»Ð°ÑÐ¸ÑÑ ÐºÑÑÑ. ÐÐ°Ð¿Ð¸ÑÐ¸ÑÐµ /start")
+        await msg.answer("Сначала нужно пройти регистрацию и оплатить курс. Напишите /start")
         return
     day = max(user["day_num"], 1)
     await send_day(msg.from_user.id, day)
@@ -294,29 +305,29 @@ async def cmd_today(msg: types.Message):
 async def cmd_progress(msg: types.Message):
     user = await get_user(msg.from_user.id)
     if not user or not user["paid"]:
-        await msg.answer("ÐÑÑÑ ÐµÑÑ Ð½Ðµ Ð½Ð°ÑÐ°Ñ. ÐÐ°Ð¿Ð¸ÑÐ¸ÑÐµ /start")
+        await msg.answer("Курс ещё не начат. Напишите /start")
         return
     day = user["day_num"]
     pct = int(day / 30 * 100)
-    bar = "â" * (day // 3) + "â" * (10 - day // 3)
+    bar = "▓" * (day // 3) + "░" * (10 - day // 3)
     await msg.answer(
-        f"ð *ÐÐ°Ñ Ð¿ÑÐ¾Ð³ÑÐµÑÑ*\n\n"
+        f"📊 *Ваш прогресс*\n\n"
         f"{bar} {pct}%\n"
-        f"ÐÑÐ¾Ð¹Ð´ÐµÐ½Ð¾: *{day} Ð¸Ð· 30 Ð´Ð½ÐµÐ¹*\n\n"
-        f"Ð¡Ð»ÐµÐ´ÑÑÑÐµÐµ Ð·Ð°Ð´Ð°Ð½Ð¸Ðµ ÑÐµÐ³Ð¾Ð´Ð½Ñ Ð² *{user['send_hour']}:00*\n\n"
-        f"Ð¢Ð°Ðº Ð´ÐµÑÐ¶Ð°ÑÑ! ðª",
+        f"Пройдено: *{day} из 30 дней*\n\n"
+        f"Следующее задание сегодня в *{user['send_hour']}:00*\n\n"
+        f"Так держать! 💪",
         reply_markup=kb_support(),
     )
 
 @dp.message(Command("help"))
 async def cmd_help(msg: types.Message):
     await msg.answer(
-        "*ÐÐ¾Ð¼Ð°Ð½Ð´Ñ Ð±Ð¾ÑÐ°:*\n\n"
-        "/start â Ð½Ð°ÑÐ°ÑÑ / Ð¿ÐµÑÐµÐ·Ð°Ð¿ÑÑÑÐ¸ÑÑ\n"
-        "/today â Ð¿Ð¾Ð»ÑÑÐ¸ÑÑ Ð·Ð°Ð´Ð°Ð½Ð¸Ðµ Ð¿ÑÑÐ¼Ð¾ ÑÐµÐ¹ÑÐ°Ñ\n"
-        "/progress â Ð¿Ð¾ÑÐ¼Ð¾ÑÑÐµÑÑ Ð¿ÑÐ¾Ð³ÑÐµÑÑ\n"
-        "/help â ÑÑÐ° ÑÐ¿ÑÐ°Ð²ÐºÐ°\n\n"
-        "ÐÐ¾ Ð»ÑÐ±ÑÐ¼ Ð²Ð¾Ð¿ÑÐ¾ÑÐ°Ð¼ â Ð½Ð°Ñ Ð»Ð¾Ð³Ð¾Ð¿ÐµÐ´ Ð²ÑÐµÐ³Ð´Ð° Ð½Ð° ÑÐ²ÑÐ·Ð¸:",
+        "*Команды бота:*\n\n"
+        "/start — начать / перезапустить\n"
+        "/today — получить задание прямо сейчас\n"
+        "/progress — посмотреть прогресс\n"
+        "/help — эта справка\n\n"
+        "По любым вопросам — наш логопед всегда на связи:",
         reply_markup=kb_support(),
     )
 
@@ -328,23 +339,23 @@ async def cb_done(call: types.CallbackQuery):
         await set_field(call.from_user.id, day_num=day + 1)
         await call.message.edit_reply_markup(reply_markup=None)
         if day < 30:
-            await call.answer(f"ÐÑÐ»Ð¸ÑÐ½Ð¾! ÐÐµÐ½Ñ {day} Ð·Ð°ÑÑÐ¸ÑÐ°Ð½ â ÐÐ°Ð²ÑÑÐ° Ð¿ÑÐ¸ÑÐ»Ñ Ð´ÐµÐ½Ñ {day+1}!", show_alert=False)
+            await call.answer(f"Отлично! День {day} засчитан ✅ Завтра пришлю день {day+1}!", show_alert=False)
         else:
-            await call.answer("ÐÐ¾Ð·Ð´ÑÐ°Ð²Ð»ÑÐµÐ¼! ÐÑÑÑ Ð·Ð°Ð²ÐµÑÑÑÐ½! ð", show_alert=True)
+            await call.answer("Поздравляем! Курс завершён! 🎉", show_alert=True)
     else:
         await call.answer()
 
-# âââ ÐÐ´Ð¼Ð¸Ð½ âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── Админ ───────────────────────────────────────────────────────────────────
 @dp.message(Command("stats"))
 async def cmd_stats(msg: types.Message):
     if msg.from_user.id not in ADMIN_IDS:
         return
     total, paid = await count_all()
     await msg.answer(
-        f"ð *Ð¡ÑÐ°ÑÐ¸ÑÑÐ¸ÐºÐ°*\n\n"
-        f"ÐÑÐµÐ³Ð¾ Ð¿Ð¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÐµÐ»ÐµÐ¹: *{total}*\n"
-        f"ÐÐ¿Ð»Ð°ÑÐ¸Ð»Ð¸ ÐºÑÑÑ: *{paid}*\n"
-        f"ÐÑÑÑÑÐºÐ°: *{paid * PRICE_RUB} â½*"
+        f"📈 *Статистика*\n\n"
+        f"Всего пользователей: *{total}*\n"
+        f"Оплатили курс: *{paid}*\n"
+        f"Выручка: *{paid * PRICE_RUB} ₽*"
     )
 
 @dp.message(Command("broadcast"))
@@ -353,7 +364,7 @@ async def cmd_broadcast(msg: types.Message):
         return
     text = msg.text.replace("/broadcast", "").strip()
     if not text:
-        await msg.answer("ÐÑÐ¿Ð¾Ð»ÑÐ·ÑÐ¹ÑÐµ: /broadcast ÑÐµÐºÑÑ ÑÐ¾Ð¾Ð±ÑÐµÐ½Ð¸Ñ")
+        await msg.answer("Используйте: /broadcast текст сообщения")
         return
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT tg_id FROM users WHERE paid=1") as cur:
@@ -366,22 +377,22 @@ async def cmd_broadcast(msg: types.Message):
         except Exception:
             fail += 1
         await asyncio.sleep(0.05)
-    await msg.answer(f"Ð Ð°ÑÑÑÐ»ÐºÐ°: â {ok} / â {fail}")
+    await msg.answer(f"Рассылка: ✅ {ok} / ❌ {fail}")
 
-# âââ Ð®Kassa ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── ЮKassa ──────────────────────────────────────────────────────────────────
 async def create_payment(tg_id: int) -> tuple[str, str]:
     try:
         payment = Payment.create({
             "amount": {"value": str(PRICE_RUB) + ".00", "currency": "RUB"},
             "confirmation": {"type": "redirect", "return_url": f"https://t.me/neyro_vershina_bot"},
             "capture": True,
-            "description": f"ÐÑÑÑ Â«30 Ð´Ð½ÐµÐ¹ Ðº ÑÐ¸ÑÑÐ¾Ð¹ ÑÐµÑÐ¸Â» | tg:{tg_id}",
+            "description": f"Курс «30 дней к чистой речи» | tg:{tg_id}",
             "metadata": {"tg_id": str(tg_id)},
         }, str(uuid.uuid4()))
         return payment.confirmation.confirmation_url, payment.id
     except Exception as e:
         log.error(f"Payment creation error: {e}")
-        # Fallback â Ð¾ÑÐ¿ÑÐ°Ð²Ð¸ÑÑ Ð½Ð° ÑÑÑÐ°Ð½Ð¸ÑÑ Ð¿Ð¾Ð´Ð´ÐµÑÐ¶ÐºÐ¸
+        # Fallback — отправить на страницу поддержки
         return SUPPORT_URL, "error"
 
 async def check_payment(payment_id: str) -> bool:
@@ -394,7 +405,7 @@ async def check_payment(payment_id: str) -> bool:
         log.error(f"Payment check error: {e}")
         return False
 
-# âââ ÐÐ¾Ð³Ð¸ÐºÐ° ÐºÑÑÑÐ° ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── Логика курса ────────────────────────────────────────────────────────────
 async def activate_user(tg_id: int):
     await set_field(tg_id, paid=1, day_num=1, paid_at=datetime.now().isoformat())
 
@@ -413,13 +424,13 @@ async def send_day(tg_id: int, day: int):
     except Exception as e:
         log.warning(f"Cannot send to {tg_id}: {e}")
 
-# âââ ÐÐ»Ð°Ð½Ð¸ÑÐ¾Ð²ÑÐ¸Ðº âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── Планировщик ─────────────────────────────────────────────────────────────
 
 @dp.message(Command("free"))
 async def cmd_free(msg: types.Message, state: FSMContext):
     """Тестовая активация без оплаты — только для администраторов."""
     if msg.from_user.id not in ADMIN_IDS:
-        await msg.answer("Команда только для администраторов.")
+        await msg.answer("⛔ Команда только для администраторов.")
         return
     user = await get_user(msg.from_user.id)
     if not user:
@@ -427,25 +438,25 @@ async def cmd_free(msg: types.Message, state: FSMContext):
         await set_field(msg.from_user.id, age_group="middle", problem="general", track="general", send_hour=9)
     await activate_user(msg.from_user.id)
     await state.clear()
-    await msg.answer("✅ *Тестовая активация!*\n\nКурс активирован бесплатно. Вот первое задание:")
+    await msg.answer("✅ *Тестовая активация!*\n\nКурс активирован. Вот первое задание:")
     await send_day(msg.from_user.id, 1)
 
 async def daily_job():
-    """ÐÐ°Ð¿ÑÑÐºÐ°ÐµÑÑÑ ÐºÐ°Ð¶Ð´ÑÐ¹ ÑÐ°Ñ â ÑÐ°ÑÑÑÐ»Ð°ÐµÑ Ð·Ð°Ð´Ð°Ð½Ð¸Ñ Ð½ÑÐ¶Ð½ÑÐ¼ Ð¿Ð¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÐµÐ»ÑÐ¼."""
+    """Запускается каждый час — рассылает задания нужным пользователям."""
     now_hour = datetime.now().hour
     users = await get_all_active()
     for u in users:
         if u["send_hour"] == now_hour:
             await send_day(u["tg_id"], u["day_num"])
-            # ÐÐ½ÐºÑÐµÐ¼ÐµÐ½ÑÐ¸ÑÑÐµÐ¼ Ð´ÐµÐ½Ñ (ÐµÑÐ»Ð¸ Ð¿Ð¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÐµÐ»Ñ Ð½Ðµ Ð½Ð°Ð¶Ð°Ð» Â«Ð¡Ð´ÐµÐ»Ð°Ð»Ð¸Â» ÑÐ°Ð¼)
+            # Инкрементируем день (если пользователь не нажал «Сделали» сам)
             if u["day_num"] < 30:
                 await set_field(u["tg_id"], day_num=u["day_num"] + 1)
             await asyncio.sleep(0.05)
 
-# âââ ÐÐ°Ð¿ÑÑÐº ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ─── Запуск ──────────────────────────────────────────────────────────────────
 async def main():
     await init_db()
-    scheduler.add_job(daily_job, "cron", minute=0)  # ÐºÐ°Ð¶Ð´ÑÐ¹ ÑÐ°Ñ Ð² 00 Ð¼Ð¸Ð½ÑÑ
+    scheduler.add_job(daily_job, "cron", minute=0)  # каждый час в 00 минут
     scheduler.start()
     log.info("Bot started")
     await dp.start_polling(bot, skip_updates=True)
