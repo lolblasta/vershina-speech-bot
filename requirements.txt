@@ -2,5 +2,4 @@ aiogram==3.7.0
 aiosqlite==0.20.0
 apscheduler==3.10.4
 python-dotenv==1.0.1
-pydantic==1.10.21
 yookassa==3.3.0
