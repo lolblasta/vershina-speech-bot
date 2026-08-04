@@ -442,7 +442,7 @@ async def cmd_free(msg: types.Message, state: FSMContext):
     await msg.answer("✅ *Тестовая активация!*\n\nКурс активирован. Вот первое задание:")
     await send_day(msg.from_user.id, 1)
 
-async def daily_job():h
+async def daily_job():
     """Запускается каждый час — рассылает задания нужным пользователям."""
     now_hour = datetime.now().hour
     users = await get_all_active()
