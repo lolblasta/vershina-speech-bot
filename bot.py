@@ -16,6 +16,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.default import DefaultBotProperties
 from aiogram.types import (
+    BotCommand,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     LabeledPrice,
@@ -462,6 +463,13 @@ async def main():
     scheduler.add_job(daily_job, "cron", minute=0)  # каждый час в 00 минут
     scheduler.start()
     log.info("Bot started")
+    await bot.set_my_commands([
+        BotCommand(command="start",    description="🏠 Начать / главное меню"),
+        BotCommand(command="today",    description="📚 Задание на сегодня"),
+        BotCommand(command="progress",  description="📊 Мой прогресс"),
+        BotCommand(command="help",      description="❓ Помощь"),
+    ])
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, skip_updates=True)
 
 if __name__ == "__main__":
