@@ -109,7 +109,7 @@ async def get_all_active() -> list[dict]:
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
         async with db.execute(
-            "SELECT * FROM users WHERE paid=1 AND day_num < 30"
+            "SELECT * FROM users WHERE (paid=1 OR (paid=0 AND day_num BETWEEN 1 AND 3)) AND day_num < 30"
         ) as cur:
             return [dict(r) for r in await cur.fetchall()]
 
@@ -241,32 +241,18 @@ async def cb_time(call: types.CallbackQuery, state: FSMContext):
     )
     await state.update_data(hour=hour)
 
-    # Тестовый режим — пропустить оплату
-    if TEST_MODE:
-        await activate_user(call.from_user.id)
-        await state.clear()
-        await call.message.edit_text(
-            "🧪 *Тестовый режим*\n\n"
-            "ЮKassa не настроена — курс активирован бесплатно. Вот первое задание:"
-        )
-        await send_day(call.from_user.id, 1)
-        return
-
-    # Создаём платёж в ЮKassa
-    payment_url, payment_id = await create_payment(call.from_user.id)
-    await set_field(call.from_user.id, payment_id=payment_id)
-
+    # Запускаем бесплатный пробный период (дни 1–3 бесплатно)
+    await set_field(call.from_user.id, day_num=1)
+    await state.clear()
     await call.message.edit_text(
-        f"✨ *Всё готово!*\n\n"
-        f"Ваш персональный курс сформирован:\n"
+        f"🎁 *Первые 3 дня — бесплатно!*\n\n"
+        f"Курс сформирован:\n"
         f"• Возраст: *{AGE_GROUPS[data['age']]}*\n"
         f"• Тема: *{PROBLEMS[data['problem']]}*\n"
         f"• Задание каждый день в *{hour}:00*\n\n"
-        f"Стоимость полного курса (30 дней) — *{PRICE_RUB} ₽*\n\n"
-        f"После оплаты вы сразу получите первое задание 🎉",
-        reply_markup=kb_pay(payment_url),
+        f"С 4-го дня курс стоит *{PRICE_RUB} ₽* — оплата только если понравится. Вот первое задание 👇"
     )
-    await state.set_state(Reg.pay)
+    await send_day(call.from_user.id, 1)
     await call.answer()
 
 @dp.callback_query(Reg.pay, F.data == "check_pay")
@@ -448,10 +434,26 @@ async def daily_job():
     users = await get_all_active()
     for u in users:
         if u["send_hour"] == now_hour:
-            await send_day(u["tg_id"], u["day_num"])
-            # Инкрементируем день (если пользователь не нажал «Сделали» сам)
-            if u["day_num"] < 30:
-                await set_field(u["tg_id"], day_num=u["day_num"] + 1)
+            if not u["paid"] and u["day_num"] >= 4:
+                # Пробный период закончился — предлагаем оплатить
+                payment_url, payment_id = await create_payment(u["tg_id"])
+                await set_field(u["tg_id"], payment_id=payment_id)
+                try:
+                    await bot.send_message(
+                        u["tg_id"],
+                        f"🎓 *3 бесплатных дня позади!*\n\n"
+                        f"Надеемся, упражнения уже помогают 💪\n\n"
+                        f"Чтобы продолжить курс (ещё 27 дней), оформите доступ — всего *{PRICE_RUB} ₽*.",
+                        reply_markup=kb_pay(payment_url),
+                        parse_mode="Markdown"
+                    )
+                except Exception as e:
+                    log.warning(f"Cannot send payment to {u['tg_id']}: {e}")
+            else:
+                await send_day(u["tg_id"], u["day_num"])
+                # Инкрементируем день
+                if u["day_num"] < 30:
+                    await set_field(u["tg_id"], day_num=u["day_num"] + 1)
             await asyncio.sleep(0.05)
 
 # ─── Запуск ──────────────────────────────────────────────────────────────────
