@@ -429,6 +429,35 @@ async def cmd_free(msg: types.Message, state: FSMContext):
     await msg.answer("✅ *Тестовая активация!*\n\nКурс активирован. Вот первое задание:")
     await send_day(msg.from_user.id, 1)
 
+@dp.message(Command("demo"))
+async def cmd_demo(msg: types.Message):
+    """Карточка товара и страница оплаты для скриншотов ЮKassa."""
+    # Сообщение 1 — карточка услуги с ценой
+    await msg.answer(
+        "🎓 *Курс «30 дней к чистой речи»*\n\n"
+        "Персональная программа от нейропсихолога и логопеда:\n\n"
+        "📌 *Что входит:*\n"
+        "• 30 ежедневных заданий под возраст ребёнка\n"
+        "• 3 трека: запуск речи, звук Р, общее развитие\n"
+        "• Задание приходит в удобное вам время\n"
+        "• Проверено логопедом\n\n"
+        "👶 *Для детей 1.5 – 7 лет*\n\n"
+        "💥 Первые *3 дня — бесплатно*\n"
+        f"💳 Полный курс (30 дней) — *{PRICE_RUB} ₽*",
+    )
+    # Сообщение 2 — оформление заказа с кнопкой оплаты
+    payment_url, payment_id = await create_payment(msg.from_user.id)
+    await set_field(msg.from_user.id, payment_id=payment_id)
+    await msg.answer(
+        "✨ *Оформление заказа*\n\n"
+        "┌ Курс: 30 дней к чистой речи\n"
+        "├ Формат: ежедневные задания в Telegram\n"
+        "├ Длительность: 30 дней\n"
+        f"└ Стоимость: *{PRICE_RUB} ₽*\n\n"
+        "После оплаты вы сразу получите первое задание 🎉",
+        reply_markup=kb_pay(payment_url),
+    )
+
 async def daily_job():
     """Запускается каждый час — рассылает задания нужным пользователям."""
     now_hour = datetime.now().hour
@@ -468,6 +497,7 @@ async def main():
         BotCommand(command="today",    description="📚 Задание на сегодня"),
         BotCommand(command="progress",  description="📊 Мой прогресс"),
         BotCommand(command="help",      description="❓ Помощь"),
+        BotCommand(command="demo",      description="📋 Карточка услуги и оплата"),
     ])
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, skip_updates=True)
