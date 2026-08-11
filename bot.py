@@ -256,7 +256,7 @@ async def cb_time(call: types.CallbackQuery, state: FSMContext):
     await send_day(call.from_user.id, 1)
     await call.answer()
 
-@dp.callback_query(Reg.pay, F.data == "check_pay")
+@dp.callback_query(F.data == "check_pay")
 async def cb_check_pay(call: types.CallbackQuery, state: FSMContext):
     user = await get_user(call.from_user.id)
     if not user or not user["payment_id"]:
