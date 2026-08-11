@@ -379,8 +379,8 @@ async def create_payment(tg_id: int) -> tuple[str, str]:
         }, str(uuid.uuid4()))
         return payment.confirmation.confirmation_url, payment.id
     except Exception as e:
-        log.error(f"")
-        Payment creation error TYPE: {type(e).__name__}: {e}
+        
+        log.error(f"Payment creation error: {e}"): {type(e).__name__}: {e}
         return SUPPORT_URL, "error"
 
 async def check_payment(payment_id: str) -> bool:
