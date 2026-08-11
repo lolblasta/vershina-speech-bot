@@ -372,7 +372,7 @@ async def create_payment(tg_id: int) -> tuple[str, str]:
     try:
         payment = Payment.create({
             "amount": {"value": str(PRICE_RUB) + ".00", "currency": "RUB"},
-            "confirmation": {"type": "redirect", "return_url": a"https://neurovershina.ru"},
+            "confirmation": {"type": "redirect", "return_url": "https://neurovershina.ru"},
             "capture": True,
             "description": f"Курс «30 дней к чистой речи» | tg:{tg_id}",
             "metadata": {"tg_id": str(tg_id)},
