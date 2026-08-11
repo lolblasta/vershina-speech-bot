@@ -258,24 +258,43 @@ async def cb_time(call: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query(F.data == "check_pay")
 async def cb_check_pay(call: types.CallbackQuery, state: FSMContext):
-    user = await get_user(call.from_user.id)
-    if not user or not user["payment_id"]:
-        await call.answer("Платёж не найден. Попробуйте /start", show_alert=True)
+    tg_id = call.from_user.id
+    user = await get_user(tg_id)
+    if not user:
+        await call.answer("Сначала пройдите /start", show_alert=True)
         return
 
-    paid = await check_payment(user["payment_id"])
+    if user.get("paid"):
+        await call.answer("Курс уже активирован! Используйте /today", show_alert=True)
+        return
+
+    paid = False
+    if user.get("payment_id") and user["payment_id"] != "error":
+        paid = await check_payment(user["payment_id"])
+
+    if not paid:
+        try:
+            payments_list = Payment.list({"metadata": {"tg_id": str(tg_id)}, "limit": 5})
+            for p in (payments_list.items or []):
+                if p.status == "succeeded":
+                    paid = True
+                    await set_field(tg_id, payment_id=p.id)
+                    break
+        except Exception as e:
+            log.warning(f"Payment list error: {e}")
+
     if paid:
-        await activate_user(call.from_user.id)
+        await activate_user(tg_id)
         await state.clear()
         await call.message.edit_text(
             "✅ *Оплата подтверждена!*\n\n"
             "Добро пожаловать в курс «30 дней к чистой речи»!\n"
             "Вот ваше первое задание 👇"
         )
-        await send_day(call.from_user.id, 1)
+        await send_day(tg_id, 1)
     else:
         await call.answer(
-            "Платёж ещё не прошёл. Попробуйте через минуту или напишите нам.",
+            "Платёж не найден. Если списание прошло — напишите нам.",
             show_alert=True,
         )
 
