@@ -599,7 +599,7 @@ TRACK_MAP = {
     ("young", "launch"):  "launch",
     ("young", "general"): "launch",
     ("young", "sound_r"): "launch",  # в 1.5-3 года Р ещё рано — переводим на запуск
-    ("middle", "launch"): "general",
+    ("middle", "launch"): "launch",  # 3-5 лет, мало говорит → трек запуска речи
     ("middle", "general"):"general",
     ("middle", "sound_r"):"sound_r",
     ("older", "launch"):  "general",
