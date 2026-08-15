@@ -55,6 +55,7 @@ Configuration.secret_key  = YOOKASSA_KEY
 bot       = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="Markdown"))
 dp        = Dispatcher(storage=MemoryStorage())
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+_sent_today: dict = {}  # {tg_id: "YYYY-MM-DD"} — защита от повторной отправки
 
 # ─── FSM ─────────────────────────────────────────────────────────────────────
 class Reg(StatesGroup):
@@ -342,15 +343,22 @@ async def cmd_help(msg: types.Message):
 async def cb_done(call: types.CallbackQuery):
     day = int(call.data.replace("done_", ""))
     user = await get_user(call.from_user.id)
-    if user and user["paid"] and user["day_num"] == day:
-        await set_field(call.from_user.id, day_num=day + 1)
+    # Удаляем кнопки сразу
+    try:
         await call.message.edit_reply_markup(reply_markup=None)
-        if day < 30:
-            await call.answer(f"Отлично! День {day} засчитан ✅ Завтра пришлю день {day+1}!", show_alert=False)
-        else:
-            await call.answer("Поздравляем! Курс завершён! 🎉", show_alert=True)
+    except Exception:
+        pass
+    # Если день ещё не был засчитан автоматически — засчитываем
+    if user and user["day_num"] == day:
+        await set_field(call.from_user.id, day_num=day + 1)
+    # Всегда даём обратную связь
+    if day < 30:
+        await call.answer(
+            f"Отлично! День {day} засчитан ✅\nЖдём вас завтра — пришлём день {day + 1}!",
+            show_alert=False
+        )
     else:
-        await call.answer()
+        await call.answer("Поздравляем! Вы прошли весь курс! 🎉", show_alert=True)
 
 # ─── Админ ───────────────────────────────────────────────────────────────────
 @dp.message(Command("stats"))
@@ -479,10 +487,17 @@ async def cmd_demo(msg: types.Message):
 
 async def daily_job():
     """Запускается каждый час — рассылает задания нужным пользователям."""
+    global _sent_today
     now_hour = datetime.now().hour
+    today = datetime.now().strftime("%Y-%m-%d")
+    # Очищаем записи предыдущих дней
+    _sent_today = {k: v for k, v in _sent_today.items() if v == today}
     users = await get_all_active()
     for u in users:
         if u["send_hour"] == now_hour:
+            tg_id = u["tg_id"]
+            if _sent_today.get(tg_id) == today:
+                continue  # Уже отправили сегодня — пропускаем
             if not u["paid"] and u["day_num"] >= 4:
                 # Пробный период закончился — предлагаем оплатить
                 payment_url, payment_id = await create_payment(u["tg_id"])
@@ -499,10 +514,11 @@ async def daily_job():
                 except Exception as e:
                     log.warning(f"Cannot send payment to {u['tg_id']}: {e}")
             else:
-                await send_day(u["tg_id"], u["day_num"])
+                await send_day(tg_id, u["day_num"])
+                _sent_today[tg_id] = today  # Помечаем — отправили сегодня
                 # Инкрементируем день
                 if u["day_num"] < 30:
-                    await set_field(u["tg_id"], day_num=u["day_num"] + 1)
+                    await set_field(tg_id, day_num=u["day_num"] + 1)
             await asyncio.sleep(0.05)
 
 # ─── Запуск ──────────────────────────────────────────────────────────────────
